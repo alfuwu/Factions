@@ -19,6 +19,7 @@ public final class Factions extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChatTransformer(this), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getCommandMap().register("faction", new FactionCommand(this));
+        getServer().getCommandMap().register("factionmsg", new FactionMsgCommand(this));
         try {
             // Initialize database connection
             connectToDatabase();
@@ -289,6 +290,22 @@ public final class Factions extends JavaPlugin {
         }
 
         return "null";
+    }
+
+    public OfflinePlayer getFactionLeader(String id) {
+        OfflinePlayer leader = null;
+        for (OfflinePlayer p : getAllPlayersInFaction(id))
+            if (isFactionLeader(p.getUniqueId()))
+                leader = p;
+        return leader;
+    }
+
+    public OfflinePlayer getFactionSuccessor(String id) {
+        OfflinePlayer successor = null;
+        for (OfflinePlayer p : getAllPlayersInFaction(id))
+            if (isFactionSuccessor(p.getUniqueId()))
+                successor = p;
+        return successor;
     }
 
     public boolean isFactionPrivate(String id) {

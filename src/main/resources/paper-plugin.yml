@@ -2,9 +2,15 @@ name: factions
 version: '1.0'
 main: com.alfuwu.factions.Factions
 api-version: '1.21'
+authors:
+  - Alfuwu ;)
 
 commands:
   faction:
     description: Faction-related commands
     usage: /faction join <id>, /faction list, /faction members <id?>, /faction leader <id?>, /faction invite <factionless player>
-    permission: yourplugin.yourcommandpermission
+    permission: factions.normal
+  factionmsg:
+    description: Message your faction privately
+    usage: /factionmsh <message>
+    permission: factions.normal

@@ -7,8 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class FactionMsgCommand extends Command {
-    protected FactionMsgCommand() {
+    public final Factions factions;
+
+    protected FactionMsgCommand(Factions factions) {
         super("factionmsg", "Message all online members of your faction", "/factionmsg <message>", List.of("f", "fmsg"));
+        this.factions = factions;
     }
 
     @Override

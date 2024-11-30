@@ -1,1 +1,1 @@
-This plugin adds some utilities that expands upon Minecraft's teams system, adding several new commands for players to use.
+This plugin adds a completely new factions system (akin to vanilla Minecraft's teams system) with expanded features such as custom hex colors, updated chat, joining, invites, and leaving all of a normal player's volition, and Faction Leaders & Successors.

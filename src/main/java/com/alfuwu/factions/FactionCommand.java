@@ -77,6 +77,20 @@ public class FactionCommand extends Command {
                         sender.sendMessage(Component.text("You have left the ").color(NamedTextColor.RED)
                                 .append(Component.text("[" + factions.getFactionName(faction) + "]").color(fColor).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
                                 .append(Component.text(" faction").color(NamedTextColor.RED)));
+                        List<OfflinePlayer> allPlayers = factions.getAllPlayersInFaction(faction);
+                        if (factions.isFactionLeader(uuid) && allPlayers.size() > 1) {
+                            OfflinePlayer successor = factions.getFactionSuccessor(faction);
+                            if (successor == null)
+                                successor = allPlayers.stream().filter(p -> p != player).toList().getFirst();
+                            final OfflinePlayer finalSuccessor = successor;
+                            factions.getPlayersInFaction(faction).forEach(p -> {
+                                if (p != player)
+                                    p.sendMessage(Component.text(finalSuccessor.getName() != null ? finalSuccessor.getName() : "null").color(NamedTextColor.RED)
+                                            .append(Component.text(" is now the Faction Leader of the ").color(NamedTextColor.GOLD))
+                                            .append(Component.text("[" + factionData.name() + "]").color(factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.GOLD).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
+                                            .append(Component.text("!").color(NamedTextColor.GOLD)));
+                            });
+                        }
                         factions.removePlayerData(uuid);
                         factions.getPlayersInFaction(faction).forEach(p -> p.sendMessage(player.name().color(NamedTextColor.RED).append(Component.text(" has left the faction").color(NamedTextColor.YELLOW))));
                         Component p = player.name().color(player.isOp() ? NamedTextColor.DARK_RED : null);
@@ -258,6 +272,13 @@ public class FactionCommand extends Command {
                             boolean sameFact = newLeader != null && faction.equals(factions.getPlayerFaction(newLeader.getUniqueId()));
                             if (sameFact && factions.getFactionFlags(newLeader.getUniqueId()) != 1) {
                                 TextColor fColor3 = factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.GOLD;
+                                factions.getPlayersInFaction(faction).forEach(p -> {
+                                    if (p != player)
+                                        p.sendMessage(Component.text(newLeader.getName()).color(NamedTextColor.RED)
+                                                .append(Component.text(" is now the Faction Leader of the ").color(NamedTextColor.GOLD))
+                                                .append(Component.text("[" + factionData.name() + "]").color(fColor3).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
+                                                .append(Component.text("!").color(NamedTextColor.GOLD)));
+                                });
                                 factions.setPlayerData(uuid, faction, (byte) 0);
                                 factions.setPlayerData(newLeader.getUniqueId(), faction, (byte) 1);
                                 sender.sendMessage(Component.text("You are no longer the Faction Leader of the ").color(NamedTextColor.GOLD)
@@ -285,6 +306,13 @@ public class FactionCommand extends Command {
                                                 .append(Component.text("[" + factionData.name() + "]").color(fColor3).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
                                                 .append(Component.text(" faction")));
                                     factions.setPlayerData(p.getUniqueId(), faction, (byte) 0);
+                                });
+                                factions.getPlayersInFaction(faction).forEach(p -> {
+                                    if (p != player)
+                                        p.sendMessage(Component.text(newSuccessor.getName()).color(NamedTextColor.RED)
+                                                .append(Component.text(" is now the Successor of the ").color(NamedTextColor.LIGHT_PURPLE))
+                                                .append(Component.text("[" + factionData.name() + "]").color(fColor3).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
+                                                .append(Component.text("!").color(NamedTextColor.LIGHT_PURPLE)));
                                 });
                                 factions.setPlayerData(newSuccessor.getUniqueId(), faction, (byte) 2);
                                 newSuccessor.sendMessage(Component.text("You are now the Successor of the ").color(NamedTextColor.LIGHT_PURPLE)
@@ -566,14 +594,19 @@ public class FactionCommand extends Command {
             sender.sendMessage(Component.text("You have joined the ").color(NamedTextColor.YELLOW)
                     .append(Component.text("[" + fData.name() + "]").color(fColor != null ? fColor : NamedTextColor.YELLOW).clickEvent(ClickEvent.runCommand("/faction info " + id)))
                     .append(Component.text(" faction!").color(NamedTextColor.YELLOW)));
-        if (players.isEmpty() && sender != null)
+        if (players.isEmpty() && sender != null) {
             sender.sendMessage(Component.text("You are now the Faction Leader of the ").color(NamedTextColor.GOLD)
                     .append(Component.text("[" + fData.name() + "]").color(fColor != null ? fColor : NamedTextColor.GOLD).clickEvent(ClickEvent.runCommand("/faction info " + id)))
                     .append(Component.text("!").color(NamedTextColor.GOLD)));
-        else if (players.size() == 1 && sender != null)
+        } else if (players.size() == 1 && sender != null) {
             sender.sendMessage(Component.text("You are now the Successor of the ").color(NamedTextColor.LIGHT_PURPLE)
                     .append(Component.text("[" + fData.name() + "]").color(fColor != null ? fColor : NamedTextColor.LIGHT_PURPLE).clickEvent(ClickEvent.runCommand("/faction info " + id)))
                     .append(Component.text("!").color(NamedTextColor.LIGHT_PURPLE)));
+            players.getFirst().sendMessage(Component.text(sender.getName()).color(NamedTextColor.RED)
+                    .append(Component.text(" is now the Successor of the ").color(NamedTextColor.LIGHT_PURPLE))
+                    .append(Component.text("[" + fData.name() + "]").color(fColor != null ? fColor : NamedTextColor.LIGHT_PURPLE).clickEvent(ClickEvent.runCommand("/faction info " + id)))
+                    .append(Component.text("!").color(NamedTextColor.LIGHT_PURPLE)));
+        }
         if (player.isOnline())
             updatePlayerName(player.getPlayer(), fData.name(), fColor);
         if (fData.applicants().remove(player.getUniqueId()))

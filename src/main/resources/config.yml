@@ -7,3 +7,6 @@ global:
 
   # Makes server operators have a dark red name color, regardless of what faction they are a part of.
   special op name color: true
+
+  # Makes creation of factions a server operator only command. Recommended to be left as true.
+  op only faction creation: true

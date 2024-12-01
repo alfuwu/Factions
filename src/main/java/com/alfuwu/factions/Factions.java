@@ -17,6 +17,7 @@ public final class Factions extends JavaPlugin {
     public boolean transformChat;
     public String chatChar;
     public boolean specialOpNameColor;
+    public boolean opOnlyFactionCreation;
     private Connection connection;
 
     @Override
@@ -38,6 +39,7 @@ public final class Factions extends JavaPlugin {
         transformChat = config.getBoolean("transform chat", true);
         chatChar = config.getString("chat char", " » ");
         specialOpNameColor = config.getBoolean("special op name color", true);
+        opOnlyFactionCreation = config.getBoolean("op only faction creation", true);
         saveConfig();
     }
 

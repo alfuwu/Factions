@@ -97,7 +97,10 @@ public class FactionCommand extends Command {
                         Player invitee = factions.getServer().getPlayerExact(args[1]);
                         if (invitee != null) {
                             if (factions.getPlayerFaction(invitee.getUniqueId()) != null) {
-                                sender.sendMessage(Component.text("That player is already in a faction").color(NamedTextColor.RED));
+                                if (invitee == player)
+                                    sender.sendMessage(Component.text("You can't send an invite to yourself, silly!").color(NamedTextColor.RED));
+                                else
+                                   sender.sendMessage(Component.text("That player is already in a faction").color(NamedTextColor.RED));
                                 return false;
                             }
                             TextColor fColor = factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.RED;
@@ -351,8 +354,8 @@ public class FactionCommand extends Command {
                         boolean isBanned = banned.contains(offlinePlayer.getUniqueId());
                         if (!isBanned) {
                             banned.add(offlinePlayer.getUniqueId());
-                            String bannedfaction = factions.getPlayerFaction(offlinePlayer.getUniqueId());
-                            if (faction.equals(bannedfaction)) {
+                            String bannedFaction = factions.getPlayerFaction(offlinePlayer.getUniqueId());
+                            if (faction.equals(bannedFaction)) {
                                 List<OfflinePlayer> allPlayers = factions.getAllPlayersInFaction(faction);
                                 if (offlinePlayer == player && allPlayers.size() > 1) // faction leader banned themselves
                                     succession(player, faction, factionData, allPlayers);
@@ -538,7 +541,7 @@ public class FactionCommand extends Command {
             case 2:
                 switch (args[0]) {
                     case "join", "leader", "successor", "members", "info", "remove":
-                        if (!args[0].equals("join") || !f)
+                        if ((!args[0].equals("join") || !f) && (!args[0].equals("remove") || sender.isOp()))
                             return factions(args[1]);
                     case "invite":
                         return players(sender, args[1], true);
@@ -554,6 +557,9 @@ public class FactionCommand extends Command {
                     case "applicants":
                         if (fl && priv)
                             return Stream.of("accept", "deny", "a", "d").filter(s -> s.startsWith(args[1])).toList();
+                    case "create":
+                        if (sender.isOp() && "#".startsWith(args[1]))
+                            return List.of("#");
                 }
             case 3:
                 switch (args[0]) {

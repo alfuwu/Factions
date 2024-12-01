@@ -78,19 +78,8 @@ public class FactionCommand extends Command {
                                 .append(Component.text("[" + factions.getFactionName(faction) + "]").color(fColor).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
                                 .append(Component.text(" faction").color(NamedTextColor.RED)));
                         List<OfflinePlayer> allPlayers = factions.getAllPlayersInFaction(faction);
-                        if (factions.isFactionLeader(uuid) && allPlayers.size() > 1) {
-                            OfflinePlayer successor = factions.getFactionSuccessor(faction);
-                            if (successor == null)
-                                successor = allPlayers.stream().filter(p -> p != player).toList().getFirst();
-                            final OfflinePlayer finalSuccessor = successor;
-                            factions.getPlayersInFaction(faction).forEach(p -> {
-                                if (p != player)
-                                    p.sendMessage(Component.text(finalSuccessor.getName() != null ? finalSuccessor.getName() : "null").color(NamedTextColor.RED)
-                                            .append(Component.text(" is now the Faction Leader of the ").color(NamedTextColor.GOLD))
-                                            .append(Component.text("[" + factionData.name() + "]").color(factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.GOLD).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
-                                            .append(Component.text("!").color(NamedTextColor.GOLD)));
-                            });
-                        }
+                        if (factions.isFactionLeader(uuid) && allPlayers.size() > 1)
+                            succession(player, faction, factionData, allPlayers);
                         factions.removePlayerData(uuid);
                         factions.getPlayersInFaction(faction).forEach(p -> p.sendMessage(player.name().color(NamedTextColor.RED).append(Component.text(" has left the faction").color(NamedTextColor.YELLOW))));
                         Component p = player.name().color(player.isOp() ? NamedTextColor.DARK_RED : null);
@@ -364,7 +353,10 @@ public class FactionCommand extends Command {
                             banned.add(offlinePlayer.getUniqueId());
                             String bannedfaction = factions.getPlayerFaction(offlinePlayer.getUniqueId());
                             if (faction.equals(bannedfaction)) {
-                                factions.setPlayerData(offlinePlayer.getUniqueId(), null, (byte) 0);
+                                List<OfflinePlayer> allPlayers = factions.getAllPlayersInFaction(faction);
+                                if (offlinePlayer == player && allPlayers.size() > 1) // faction leader banned themselves
+                                    succession(player, faction, factionData, allPlayers);
+                                factions.removePlayerData(offlinePlayer.getUniqueId());
                                 Component playerName = offlinePlayer.getPlayer().name().color(offlinePlayer.isOp() ? NamedTextColor.DARK_RED : null);
                                 offlinePlayer.getPlayer().displayName(playerName);
                                 offlinePlayer.getPlayer().playerListName(playerName);
@@ -501,8 +493,8 @@ public class FactionCommand extends Command {
                         invalid(sender);
                         break;
                     }
-                    boolean bl4 = factions.removeFactionData(args[1]);
                     FactionData factionData5 = factions.getFactionData(args[1]);
+                    boolean bl4 = factions.removeFactionData(args[1]);
                     factions.getAllPlayersInFaction(args[1]).forEach(p -> {
                         factions.removePlayerData(p.getUniqueId());
                         if (p.isOnline()) {
@@ -545,7 +537,7 @@ public class FactionCommand extends Command {
                         Stream.of("create", "remove") : Stream.empty()).filter(s -> s.startsWith(args[0])).toList();
             case 2:
                 switch (args[0]) {
-                    case "join", "leader", "successor", "members", "info":
+                    case "join", "leader", "successor", "members", "info", "remove":
                         if (!args[0].equals("join") || !f)
                             return factions(args[1]);
                     case "invite":
@@ -612,6 +604,20 @@ public class FactionCommand extends Command {
         if (fData.applicants().remove(player.getUniqueId()))
             factions.setFactionData(id, fData.name(), fData.description(), fData.color(), fData.priv(), fData.applicants(), fData.banned());
         factions.setPlayerData(player.getUniqueId(), id, (byte)(players.isEmpty() ? 1 : players.size() == 1 ? 2 : 0));
+    }
+
+    private void succession(Player player, String faction, FactionData factionData, List<OfflinePlayer> players) {
+        OfflinePlayer successor = factions.getFactionSuccessor(faction);
+        if (successor == null)
+            successor = players.stream().filter(p -> p != player).toList().getFirst();
+        final OfflinePlayer finalSuccessor = successor;
+        factions.getPlayersInFaction(faction).forEach(p -> {
+            if (p != player)
+                p.sendMessage(Component.text(finalSuccessor.getName() != null ? finalSuccessor.getName() : "null").color(NamedTextColor.RED)
+                        .append(Component.text(" is now the Faction Leader of the ").color(NamedTextColor.GOLD))
+                        .append(Component.text("[" + factionData.name() + "]").color(factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.GOLD).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
+                        .append(Component.text("!").color(NamedTextColor.GOLD)));
+        });
     }
 
     private static void updatePlayerName(Player player, String faction, TextColor color) {

@@ -32,15 +32,15 @@ public class PlayerListener implements Listener {
             event.joinMessage(p.append(Component.text(" joined the game").color(NamedTextColor.YELLOW)));
             if (factions.isFactionLeader(player.getUniqueId()) && factionData.priv() && !factionData.applicants().isEmpty())
                 player.sendMessage(Component.text("Your faction has applicants waiting to be approved by you").color(NamedTextColor.GOLD));
+        } else if (player.isOp()) {
+            player.displayName(player.name().color(NamedTextColor.DARK_RED));
+            player.playerListName(player.name().color(NamedTextColor.DARK_RED));
         }
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        String faction = factions.getPlayerFaction(player.getUniqueId());
-        if (faction != null)
-            event.quitMessage(player.displayName()
-                    .append(Component.text(" left the game").color(NamedTextColor.YELLOW)));
+        event.quitMessage(event.getPlayer().displayName()
+                .append(Component.text(" left the game").color(NamedTextColor.YELLOW)));
     }
 }

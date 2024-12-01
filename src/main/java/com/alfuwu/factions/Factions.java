@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Factions extends JavaPlugin {
     private Connection connection;
@@ -333,7 +334,7 @@ public final class Factions extends JavaPlugin {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next())
-                    return Arrays.stream(rs.getString(column).split(",")).map(UUID::fromString).toList();
+                    return Arrays.stream(rs.getString(column).split(",")).map(UUID::fromString).collect(Collectors.toList());
             }
         } catch (SQLException e) {
             getLogger().severe("Could not query faction data: " + e.getMessage());
@@ -359,7 +360,7 @@ public final class Factions extends JavaPlugin {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next())
-                    factionData = new FactionData(id, rs.getString("name"), rs.getString("description"), rs.getInt("color"), rs.getBoolean("private"), rs.getString("applicants").isEmpty() ? List.of() : Arrays.stream(rs.getString("applicants").split(",")).map(UUID::fromString).toList(), rs.getString("banned").isEmpty() ? List.of() : Arrays.stream(rs.getString("banned").split(",")).map(UUID::fromString).toList());
+                    factionData = new FactionData(id, rs.getString("name"), rs.getString("description"), rs.getInt("color"), rs.getBoolean("private"), rs.getString("applicants").isEmpty() ? new ArrayList<>() : Arrays.stream(rs.getString("applicants").split(",")).map(UUID::fromString).collect(Collectors.toList()), rs.getString("banned").isEmpty() ? new ArrayList<>() : Arrays.stream(rs.getString("banned").split(",")).map(UUID::fromString).collect(Collectors.toList()));
             }
         } catch (SQLException e) {
             getLogger().severe("Could not retrieve data for faction with ID: " + id + ": " + e.getMessage());

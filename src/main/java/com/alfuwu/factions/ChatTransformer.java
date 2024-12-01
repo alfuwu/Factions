@@ -3,6 +3,7 @@ package com.alfuwu.factions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,6 +32,6 @@ public class ChatTransformer implements Listener {
             p.sendMessage(Component.text(factionName != null ? "[" + factionName + "] " : "").color(factionColor)
                     .append(player.name().color(player.isOp() ? NamedTextColor.DARK_RED : factionColor))
                     .append(Component.text(" > ").color(NamedTextColor.GRAY))
-                    .append(Component.text(event.getMessage()).color(NamedTextColor.WHITE)));
+                    .append(Component.text(ChatColor.translateAlternateColorCodes('&', event.getMessage())).color(NamedTextColor.WHITE)));
     }
 }

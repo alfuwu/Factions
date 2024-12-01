@@ -9,6 +9,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.UUID;
+
 public class PlayerListener implements Listener {
     public final Factions factions;
 
@@ -21,15 +23,15 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         String faction = factions.getPlayerFaction(player.getUniqueId());
         if (faction != null) {
-            String name = factions.getFactionName(faction);
-            Integer c = factions.getFactionColor(faction);
-            TextColor fColor = c != null ? TextColor.color(c) : NamedTextColor.WHITE;
-            Component p = Component.text("[" + name + "] ").color(fColor)
+            FactionData factionData = factions.getFactionData(faction);
+            TextColor fColor = factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.WHITE;
+            Component p = Component.text("[" + factionData.name() + "] ").color(fColor)
                     .append(player.name().color(player.isOp() ? NamedTextColor.DARK_RED : fColor));
             player.displayName(p);
             player.playerListName(p);
-            if (c != null)
-                event.joinMessage(p.append(Component.text(" joined the game").color(NamedTextColor.YELLOW)));
+            event.joinMessage(p.append(Component.text(" joined the game").color(NamedTextColor.YELLOW)));
+            if (factions.isFactionLeader(player.getUniqueId()) && factionData.priv() && !factionData.applicants().isEmpty())
+                player.sendMessage(Component.text("Your faction has applicants waiting to be approved by you").color(NamedTextColor.GOLD));
         }
     }
 

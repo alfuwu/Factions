@@ -40,6 +40,10 @@ public class FactionCommand extends Command {
                     if (factions.getPlayerFaction(uuid) == null) {
                         FactionData fData = factions.getFactionData(args.length > 1 ? args[1] : "");
                         if (fData != null && args.length > 1) {
+                            if (fData.banned().contains(uuid)) {
+                                sender.sendMessage(Component.text("You're banned from this faction").color(NamedTextColor.RED));
+                                return false;
+                            }
                             OfflinePlayer leader = factions.getFactionLeader(args[1]);
                             if (fData.priv() && leader != null) {
                                 if (fData.applicants().contains(uuid)) {
@@ -330,10 +334,23 @@ public class FactionCommand extends Command {
                         boolean isBanned = banned.contains(offlinePlayer.getUniqueId());
                         if (!isBanned) {
                             banned.add(offlinePlayer.getUniqueId());
+                            String bannedfaction = factions.getPlayerFaction(offlinePlayer.getUniqueId());
+                            if (faction.equals(bannedfaction)) {
+                                factions.setPlayerData(offlinePlayer.getUniqueId(), null, (byte) 0);
+                                Component playerName = offlinePlayer.getPlayer().name().color(offlinePlayer.isOp() ? NamedTextColor.DARK_RED : null);
+                                offlinePlayer.getPlayer().displayName(playerName);
+                                offlinePlayer.getPlayer().playerListName(playerName);
+                                factions.getPlayersInFaction(faction).stream().filter(p -> p != player).forEach(p -> p.sendMessage(Component.text(offlinePlayer.getName()).color(NamedTextColor.RED)
+                                        .append(Component.text(" has been banned from the faction").color(NamedTextColor.GOLD))));
+                            }
                             factions.setFactionData(faction, factionData.name(), factionData.description(), factionData.color(), factionData.priv(), factionData.applicants(), banned);
-                            sender.sendMessage(Component.text("Banned ").color(null)
+                            sender.sendMessage(Component.text("Banned ").color(NamedTextColor.GOLD)
                                     .append(Component.text(offlinePlayer.getName()).color(NamedTextColor.RED))
-                                    .append(Component.text(" from your faction").color(null)));
+                                    .append(Component.text(" from your faction").color(NamedTextColor.GOLD)));
+                            if (offlinePlayer.isOnline())
+                                offlinePlayer.getPlayer().sendMessage(Component.text("You have been banned from the ").color(NamedTextColor.RED)
+                                        .append(Component.text("[" + factionData.name() + "]").color(factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.RED).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
+                                        .append(Component.text(" faction").color(NamedTextColor.RED)));
                             return true;
                         } else {
                             sender.sendMessage(Component.text("That player is already banned from your faction").color(NamedTextColor.RED));
@@ -359,6 +376,10 @@ public class FactionCommand extends Command {
                             sender.sendMessage(Component.text("Unbanned ").color(null)
                                     .append(Component.text(offlinePlayer2.getName()).color(NamedTextColor.RED))
                                     .append(Component.text(" from your faction").color(null)));
+                            if (offlinePlayer2.isOnline())
+                                offlinePlayer2.getPlayer().sendMessage(Component.text("You have been unbanned from the ").color(NamedTextColor.GOLD)
+                                        .append(Component.text("[" + factionData.name() + "]").color(factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.GOLD).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
+                                        .append(Component.text(" faction").color(NamedTextColor.GOLD)));
                             return true;
                         } else {
                             sender.sendMessage(Component.text("That player isn't banned!").color(NamedTextColor.RED));

@@ -222,11 +222,14 @@ public class FactionCommand extends Command {
                     }
                 case "members":
                     String factionId3 = args.length == 1 ? faction : args[1];
-                    if (factionId3 == null) {
+                    FactionData factionData2 = factions.getFactionData(factionId3);
+                    if (faction == null) {
                         notInFaction(sender);
                         return false;
+                    } else if (factionData2 == null) {
+                        sender.sendMessage(Component.text("That faction doesn't exist!").color(NamedTextColor.RED));
+                        return false;
                     }
-                    FactionData factionData2 = factions.getFactionData(factionId3);
                     List<OfflinePlayer> players = factions.getAllPlayersInFaction(faction);
                     Component text = Component.text("Members of the ")
                             .append(Component.text("[" + factionData2.name() + "]").color(factionData2.color() != null ? TextColor.color(factionData2.color()) : null).clickEvent(ClickEvent.runCommand("/faction info " + factionId3)))

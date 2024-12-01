@@ -51,6 +51,6 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         event.deathMessage(event.getPlayer().displayName()
-                .append(Component.text(event.getDeathMessage() != null ? event.getDeathMessage().replace(event.getPlayer().getName(), "") : "").color(NamedTextColor.WHITE)));
+                .append(Component.text(event.getDeathMessage() != null ? event.getDeathMessage().replace(event.getPlayer().getName(), "") : " mysteriously died").color(NamedTextColor.WHITE)));
     }
 }

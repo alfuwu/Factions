@@ -82,8 +82,9 @@ public class FactionCommand extends Command {
                             succession(player, faction, factionData, allPlayers);
                         factions.removePlayerData(uuid);
                         factions.getPlayersInFaction(faction).forEach(p -> p.sendMessage(player.name().color(NamedTextColor.RED).append(Component.text(" has left the faction").color(NamedTextColor.YELLOW))));
-                        Component p = player.name().color(player.isOp() ? NamedTextColor.DARK_RED : null);
+                        Component p = player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : null);
                         player.displayName(p);
+                        player.customName(p);
                         player.playerListName(p);
                         return true;
                     }
@@ -360,8 +361,9 @@ public class FactionCommand extends Command {
                                 if (offlinePlayer == player && allPlayers.size() > 1) // faction leader banned themselves
                                     succession(player, faction, factionData, allPlayers);
                                 factions.removePlayerData(offlinePlayer.getUniqueId());
-                                Component playerName = offlinePlayer.getPlayer().name().color(offlinePlayer.isOp() ? NamedTextColor.DARK_RED : null);
+                                Component playerName = offlinePlayer.getPlayer().name().color(offlinePlayer.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : null);
                                 offlinePlayer.getPlayer().displayName(playerName);
+                                offlinePlayer.getPlayer().customName(playerName);
                                 offlinePlayer.getPlayer().playerListName(playerName);
                                 factions.getPlayersInFaction(faction).stream().filter(p -> p != player).forEach(p -> p.sendMessage(Component.text(offlinePlayer.getName()).color(NamedTextColor.RED)
                                         .append(Component.text(" has been banned from the faction").color(NamedTextColor.GOLD))));
@@ -423,8 +425,9 @@ public class FactionCommand extends Command {
                     factions.getAllPlayersInFaction(args[1]).forEach(p -> {
                         factions.removePlayerData(p.getUniqueId());
                         if (p.isOnline()) {
-                            Component playerName = player.name().color(player.isOp() ? NamedTextColor.DARK_RED : null);
+                            Component playerName = player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : null);
                             p.getPlayer().displayName(playerName);
+                            p.getPlayer().customName(playerName);
                             p.getPlayer().playerListName(playerName);
                             p.getPlayer().sendMessage(Component.text("Your faction has been disbanded by your Faction Leader").color(NamedTextColor.RED));
                         }
@@ -501,8 +504,9 @@ public class FactionCommand extends Command {
                     factions.getAllPlayersInFaction(args[1]).forEach(p -> {
                         factions.removePlayerData(p.getUniqueId());
                         if (p.isOnline()) {
-                            Component playerName = player.name().color(player.isOp() ? NamedTextColor.DARK_RED : null);
+                            Component playerName = player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : null);
                             p.getPlayer().displayName(playerName);
+                            p.getPlayer().customName(playerName);
                             p.getPlayer().playerListName(playerName);
                             p.getPlayer().sendMessage(Component.text("Your faction has been forcefully disbanded").color(NamedTextColor.RED));
                         }
@@ -626,10 +630,11 @@ public class FactionCommand extends Command {
         });
     }
 
-    private static void updatePlayerName(Player player, String faction, TextColor color) {
+    private void updatePlayerName(Player player, String faction, TextColor color) {
         Component p = Component.text("[" + faction + "] ").color(color != null ? color : NamedTextColor.WHITE).clickEvent(ClickEvent.runCommand("/faction info " + faction))
-                .append(player.name().color(player.isOp() ? NamedTextColor.DARK_RED : color != null ? color : NamedTextColor.WHITE));
+                .append(player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : color != null ? color : NamedTextColor.WHITE));
         player.displayName(p);
+        player.customName(p);
         player.playerListName(p);
     }
 

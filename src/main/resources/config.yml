@@ -1,0 +1,9 @@
+global:
+  # Transforms the Minecraft chat to reflect the faction a player is a part of, and additionally make chat more readable.
+  transform chat: true
+
+  # The (set of) character(s) to use between a player's name and their message content. Only works if transform chat is enabled.
+  chat char: " » "
+
+  # Makes server operators have a dark red name color, regardless of what faction they are a part of.
+  special op name color: true

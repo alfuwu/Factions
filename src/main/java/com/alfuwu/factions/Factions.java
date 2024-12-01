@@ -2,6 +2,7 @@ package com.alfuwu.factions;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class Factions extends JavaPlugin {
+    public boolean transformChat;
+    public String chatChar;
+    public boolean specialOpNameColor;
     private Connection connection;
 
     @Override
@@ -28,6 +32,13 @@ public final class Factions extends JavaPlugin {
         } catch (SQLException e) {
             getLogger().severe("Could not set up the database: " + e.getMessage());
         }
+
+        saveDefaultConfig();
+        FileConfiguration config = getConfig();
+        transformChat = config.getBoolean("transform chat", true);
+        chatChar = config.getString("chat char", " » ");
+        specialOpNameColor = config.getBoolean("special op name color", true);
+        saveConfig();
     }
 
     @Override

@@ -1,16 +1,18 @@
 package com.alfuwu.factions;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.util.UUID;
+import org.bukkit.scoreboard.Team;
 
 public class PlayerListener implements Listener {
     public final Factions factions;
@@ -50,7 +52,15 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
+        Team team = factions.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(event.getPlayer());
         event.deathMessage(event.getPlayer().displayName()
-                .append(Component.text(event.getDeathMessage() != null ? event.getDeathMessage().replace(event.getPlayer().getName(), "") : " mysteriously died").color(NamedTextColor.WHITE)));
+                .append(Component.text(event.getDeathMessage() != null ? event.getDeathMessage().substring(event.getPlayer().getName().length() + (team != null ? team.getSuffix().length() + team.getPrefix().length() : 0)) : " mysteriously died").color(NamedTextColor.WHITE)));
+    }
+
+    @EventHandler
+    public void onPlayerAdvancement(PlayerAdvancementDoneEvent event) {
+        Team team = factions.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(event.getPlayer());
+        if (event.message() != null)
+            event.message(event.message().replaceText(TextReplacementConfig.builder().replacement(event.getPlayer().displayName()).match((team != null ? team.getPrefix() : "") + event.getPlayer().getName() + (team != null ? team.getSuffix() : "")).once().build()));
     }
 }

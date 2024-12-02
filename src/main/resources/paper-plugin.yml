@@ -1,5 +1,5 @@
 name: factions
-version: '1.3'
+version: '1.4'
 main: com.alfuwu.factions.Factions
 api-version: '1.21'
 authors:
@@ -12,5 +12,13 @@ commands:
     permission: factions.normal
   factionmsg:
     description: Message your faction privately
-    usage: /factionmsh <message>
+    usage: /factionmsg <message>
+    permission: factions.normal
+  factiontrust:
+    description: Trust players of your faction (GriefPrevention)
+    usage: /factiontrust <trust type:access|container|build|all>
+    permission: factions.normal
+  unfactiontrust:
+    description: Untrusts players of your faction (GriefPrevention)
+    usage: /unfactiontrust
     permission: factions.normal

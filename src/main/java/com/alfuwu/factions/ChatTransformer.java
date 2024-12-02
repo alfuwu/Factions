@@ -1,10 +1,11 @@
 package com.alfuwu.factions;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -30,10 +31,9 @@ public class ChatTransformer implements Listener {
         // this probably causes a TEENCY amount of chat lag
         // but cool chat ;-;
         event.setCancelled(true);
-        for (Player p : event.getRecipients())
-            p.sendMessage(Component.text(factionName != null ? "[" + factionName + "] " : "").color(factionColor)
-                    .append(player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : factionColor))
-                    .append(Component.text(factions.chatChar).color(TextColor.color(0x888888))) // 0x888888 is in between dark gray and gray colors
-                    .append(Component.text(ChatColor.translateAlternateColorCodes('&', event.getMessage())).color(NamedTextColor.WHITE)));
+        Audience.audience(event.getRecipients()).sendMessage(Component.text(factionName != null ? "[" + factionName + "] " : "").color(factionColor).clickEvent(ClickEvent.runCommand("/faction info " + faction))
+                .append(player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : factionColor))
+                .append(Component.text(factions.chatChar).color(TextColor.color(0x888888)).clickEvent(null)) // 0x888888 is in between dark gray and gray colors
+                .append(Component.text(ChatColor.translateAlternateColorCodes('&', event.getMessage())).color(NamedTextColor.WHITE).clickEvent(null)));
     }
 }

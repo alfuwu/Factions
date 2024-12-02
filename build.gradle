@@ -3,7 +3,12 @@ plugins {
 }
 
 group = 'com.alfuwu'
-version = '1.4'
+version = '1.5'
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
 
 repositories {
     mavenCentral()

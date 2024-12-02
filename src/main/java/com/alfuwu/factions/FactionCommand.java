@@ -348,7 +348,7 @@ public class FactionCommand extends Command {
                             sender.sendMessage(Component.text("Updated ")
                                     .append(Component.text("[" + factionData.name() + "]").color(fColor != null ? fColor : NamedTextColor.WHITE).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
                                     .append(Component.text("'s color")));
-                            factions.getPlayersInFaction(faction).forEach(p -> updatePlayerName(p, factionData.name(), faction, fColor));
+                            factions.getPlayersInFaction(faction).forEach(p -> updatePlayerName(p, faction, factionData.name(), fColor));
                             break;
                         case "name":
                             String name = String.join(" ", Arrays.stream(args).toList().subList(2, args.length));
@@ -357,7 +357,7 @@ public class FactionCommand extends Command {
                             sender.sendMessage(Component.text("Updated ")
                                     .append(Component.text("[" + name + "]").color(fColor2 != null ? fColor2 : NamedTextColor.WHITE).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
                                     .append(Component.text("'s name")));
-                            factions.getPlayersInFaction(faction).forEach(p -> updatePlayerName(p, name, faction, fColor2));
+                            factions.getPlayersInFaction(faction).forEach(p -> updatePlayerName(p, faction, name, fColor2));
                             break;
                         case "description":
                             String description = String.join(" ", Arrays.stream(args).toList().subList(2, args.length));
@@ -584,7 +584,20 @@ public class FactionCommand extends Command {
                         return true;
                     } else if (args.length == 3) {
                         if (args[1].equals("accept") || args[1].equals("a")) {
-                            joinFaction(factions.getServer().getOfflinePlayer(args[2]), faction, factionData);
+                            OfflinePlayer joinee = factions.getServer().getOfflinePlayer(args[2]);
+                            if (factions.getPlayerFaction(joinee.getUniqueId()) != null) {
+                                sender.sendMessage(Component.text("This application has expired").color(NamedTextColor.RED));
+                                factionData.applicants().remove(joinee.getUniqueId());
+                                factions.setFactionData(faction, factionData.name(), factionData.description(), factionData.color(), true, factionData.applicants(), factionData.banned());
+                                break;
+                            } else if (!joinee.hasPlayedBefore()) {
+                                sender.sendMessage(Component.text("That player doesn't exist!").color(NamedTextColor.RED));
+                                break;
+                            } else if (!factionData.applicants().contains(joinee.getUniqueId())) {
+                                sender.sendMessage(Component.text("That player hasn't applied to your faction!").color(NamedTextColor.RED));
+                                break;
+                            }
+                            joinFaction(joinee, faction, factionData);
                         } else if (args[1].equals("deny") || args[1].equals("d")) {
                             if (factionData.applicants().remove(factions.getServer().getOfflinePlayer(args[2]).getUniqueId())) {
                                 sender.sendMessage(Component.text("Denied ")
@@ -593,9 +606,11 @@ public class FactionCommand extends Command {
                                 factions.setFactionData(faction, factionData.name(), factionData.description(), factionData.color(), true, factionData.applicants(), factionData.banned());
                             } else {
                                 sender.sendMessage(Component.text("That player hasn't applied to your faction!").color(NamedTextColor.RED));
+                                break;
                             }
                         } else {
                             sender.sendMessage(Component.text("Invalid arguments (expected <accept|deny> <playername>").color(NamedTextColor.RED));
+                            break;
                         }
                         return true;
                     }
@@ -750,7 +765,7 @@ public class FactionCommand extends Command {
                         .append(Component.text("!").color(NamedTextColor.LIGHT_PURPLE)));
         }
         if (player.isOnline())
-            updatePlayerName(player.getPlayer(), fData.name(), id, fColor);
+            updatePlayerName(player.getPlayer(), id, fData.name(), fColor);
         if (fData.applicants().remove(player.getUniqueId()))
             factions.setFactionData(id, fData.name(), fData.description(), fData.color(), fData.priv(), fData.applicants(), fData.banned());
         factions.setPlayerData(player.getUniqueId(), id, (byte)(players.isEmpty() ? 1 : players.size() == 1 ? 2 : 0));
@@ -780,6 +795,7 @@ public class FactionCommand extends Command {
 
     private static Component application(OfflinePlayer applier, boolean msg) {
         return Component.text((applier.getName() != null ? applier.getName() : "null") + (msg ? " would like to join your faction" : "")).color(NamedTextColor.YELLOW)
+                .append(Component.text(" - ").color(NamedTextColor.GRAY).clickEvent(ClickEvent.callback((audience) -> audience.sendMessage(Component.text("Why are you clicking this, silly").color(NamedTextColor.GREEN)))))
                 .append(Component.text(" [ACCEPT]").color(NamedTextColor.GREEN).clickEvent(ClickEvent.runCommand("/faction applicants a " + applier.getName())))
                 .append(Component.text(" [DENY]").color(NamedTextColor.RED).clickEvent(ClickEvent.runCommand("/faction applicants d " + applier.getName())));
     }

@@ -1,18 +1,20 @@
 package com.alfuwu.factions;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.*;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scoreboard.Team;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 public class PlayerListener implements Listener {
     public final Factions factions;
@@ -21,14 +23,14 @@ public class PlayerListener implements Listener {
         this.factions = factions;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         String faction = factions.getPlayerFaction(player.getUniqueId());
         if (faction != null) {
             FactionData factionData = factions.getFactionData(faction);
             TextColor fColor = factionData.color() != null ? TextColor.color(factionData.color()) : NamedTextColor.WHITE;
-            Component p = Component.text("[" + factionData.name() + "] ").color(fColor)
+            Component p = Component.text("[" + factionData.name() + "] ").color(fColor).clickEvent(ClickEvent.runCommand("/faction info " + faction))
                     .append(player.name().color(player.isOp() && factions.specialOpNameColor ? NamedTextColor.DARK_RED : fColor));
             player.displayName(p);
             player.customName(p);
@@ -40,27 +42,37 @@ public class PlayerListener implements Listener {
             player.customName(player.name().color(NamedTextColor.DARK_RED));
             player.playerListName(player.name().color(NamedTextColor.DARK_RED));
         }
-        event.joinMessage(player.displayName().colorIfAbsent(NamedTextColor.YELLOW)
-                .append(Component.text(" joined the game").color(NamedTextColor.YELLOW)));
+        if (event.joinMessage() instanceof TranslatableComponent translatable)
+            event.joinMessage(translatable.arguments(player.displayName()));
+        else
+            event.joinMessage(player.displayName().colorIfAbsent(NamedTextColor.YELLOW)
+                    .append(Component.text(" joined the game").color(NamedTextColor.YELLOW)));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLeave(PlayerQuitEvent event) {
-        event.quitMessage(event.getPlayer().displayName().colorIfAbsent(NamedTextColor.YELLOW)
-                .append(Component.text(" left the game").color(NamedTextColor.YELLOW)));
+        if (event.quitMessage() instanceof TranslatableComponent translatable)
+            event.quitMessage(translatable.arguments(event.getPlayer().displayName()));
+        else
+            event.quitMessage(event.getPlayer().displayName().colorIfAbsent(NamedTextColor.YELLOW)
+                    .append(Component.text(" left the game").color(NamedTextColor.YELLOW)));
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Team team = factions.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(event.getPlayer());
-        event.deathMessage(event.getPlayer().displayName()
-                .append(Component.text(event.getDeathMessage() != null ? event.getDeathMessage().substring(event.getPlayer().getName().length() + (team != null ? team.getSuffix().length() + team.getPrefix().length() : 0)) : " mysteriously died").color(NamedTextColor.WHITE)));
+        if (event.deathMessage() instanceof TranslatableComponent translatable) {
+            List<? extends ComponentLike> args = translatable.arguments();
+            args = Stream.concat(Stream.concat(Stream.of(event.getPlayer().displayName()), event.getDamageSource().getCausingEntity() instanceof Player attacker ? Stream.of(attacker.displayName()) : Stream.empty()), args.subList(event.getDamageSource().getCausingEntity() instanceof Player ? 2 : 1, args.size()).stream()).toList();
+            event.deathMessage(translatable.arguments(args));
+        }
     }
 
     @EventHandler
     public void onPlayerAdvancement(PlayerAdvancementDoneEvent event) {
-        Team team = factions.getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(event.getPlayer());
-        if (event.message() != null)
-            event.message(event.message().replaceText(TextReplacementConfig.builder().replacement(event.getPlayer().displayName()).match((team != null ? team.getPrefix() : "") + event.getPlayer().getName() + (team != null ? team.getSuffix() : "")).once().build()));
+        if (event.message() instanceof TranslatableComponent translatable) {
+            List<? extends ComponentLike> args = translatable.arguments();
+            args = Stream.concat(Stream.of(event.getPlayer().displayName()), args.subList(1, args.size()).stream()).toList();
+            event.message(translatable.arguments(args));
+        }
     }
 }

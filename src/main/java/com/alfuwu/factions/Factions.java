@@ -116,10 +116,10 @@ public final class Factions extends JavaPlugin {
         try (PreparedStatement pstmt = connection.prepareStatement(upsertSQL)) {
             pstmt.setString(1, uuid.toString());
             pstmt.setString(2, factionId);
-            pstmt.setByte(3, flags);
+            pstmt.setByte(3, flags != null ? flags : 0);
             // CONFLICT
             pstmt.setString(4, factionId);
-            pstmt.setByte(5, flags);
+            pstmt.setByte(5, flags != null ? flags : 0);
             pstmt.executeUpdate();
             getLogger().info("Faction data updated for player: " + uuid);
         } catch (SQLException e) {
@@ -152,15 +152,15 @@ public final class Factions extends JavaPlugin {
             pstmt.setString(1, id);
             pstmt.setString(2, displayName);
             pstmt.setString(3, description);
-            pstmt.setInt(4, color);
-            pstmt.setByte(5, (byte)(priv ? 1 : 0));
+            pstmt.setInt(4, color != null ? color : 0xFFFFFF);
+            pstmt.setByte(5, (byte)(priv != null && priv ? 1 : 0));
             pstmt.setString(6, String.join(",", applicants.stream().map(UUID::toString).toList()));
             pstmt.setString(7, String.join(",", banned.stream().map(UUID::toString).toList()));
             // CONFLICT
             pstmt.setString(8, displayName);
             pstmt.setString(9, description);
-            pstmt.setInt(10, color);
-            pstmt.setByte(11, (byte)(priv ? 1 : 0));
+            pstmt.setInt(10, color != null ? color : 0xFFFFFF);
+            pstmt.setByte(11, (byte)(priv != null && priv ? 1 : 0));
             pstmt.setString(12, String.join(",", applicants.stream().map(UUID::toString).toList()));
             pstmt.setString(13, String.join(",", banned.stream().map(UUID::toString).toList()));
             pstmt.executeUpdate();

@@ -1,5 +1,6 @@
 package com.alfuwu.factions;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -57,11 +58,7 @@ public class FactionMsgCommand extends Command {
                 .append(Component.text("] ").color(NamedTextColor.GOLD))
                 .append(Component.text(ChatColor.translateAlternateColorCodes('&', message)).color(NamedTextColor.WHITE));
 
-        List<Player> onlineMembers = factions.getPlayersInFaction(factionId);
-
-        for (Player member : onlineMembers)
-            member.sendMessage(formattedMessage);
-
+        Audience.audience(factions.getPlayersInFaction(factionId)).sendMessage(formattedMessage);
         return true;
     }
 

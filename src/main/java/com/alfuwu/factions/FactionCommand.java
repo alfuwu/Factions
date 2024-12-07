@@ -198,7 +198,6 @@ public class FactionCommand extends Command {
                             invitee.sendMessage(player.name().color(fColor)
                                     .append(Component.text(" has invited you to join the ").color(NamedTextColor.GOLD))
                                     .append(Component.text("[" + factionData.name() + "]").color(fColor).clickEvent(ClickEvent.runCommand("/faction info " + faction)))
-                                    .append(Component.text(" faction").color(NamedTextColor.GOLD))
                                     .appendNewline().append(Component.text("[ACCEPT] ").color(NamedTextColor.GREEN).clickEvent(ClickEvent.callback((audience) -> {
                                         if (!sentMsg.get()) {
                                             sender.sendMessage(invitee.displayName()
@@ -271,7 +270,7 @@ public class FactionCommand extends Command {
                 case "members":
                     String factionId3 = args.length == 1 ? faction : args[1];
                     FactionData factionData2 = factions.getFactionData(factionId3);
-                    if (faction == null) {
+                    if (factionId3 == null) {
                         notInFaction(sender);
                         return false;
                     } else if (factionData2 == null) {
@@ -306,7 +305,7 @@ public class FactionCommand extends Command {
                 case "info":
                     String factionId4 = args.length == 1 ? faction : args[1];
                     FactionData factionData3 = factions.getFactionData(factionId4);
-                    if (faction == null) {
+                    if (factionId4 == null) {
                         notInFaction(sender);
                         return false;
                     } else if (factionData3 != null) {

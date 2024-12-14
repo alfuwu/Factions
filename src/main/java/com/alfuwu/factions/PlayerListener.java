@@ -35,7 +35,12 @@ public class PlayerListener implements Listener {
             player.displayName(p);
             player.customName(p);
             player.playerListName(p);
-            if (factions.isFactionLeader(player.getUniqueId()) && factionData.priv() && !factionData.applicants().isEmpty())
+            boolean l = factions.isFactionLeader(player.getUniqueId());
+            if (l && !factions.getFactionLeader(faction).getUniqueId().equals(player.getUniqueId())) {
+                l = false;
+                factions.setPlayerData(player.getUniqueId(), faction, factions.getFactionSuccessor(faction) == null ? (byte)2 : (byte)0);
+            }
+            if (l && factionData.priv() && !factionData.applicants().isEmpty())
                 player.sendMessage(Component.text("Your faction has applicants waiting to be approved by you").color(NamedTextColor.GOLD));
         } else if (player.isOp() && factions.specialOpNameColor) {
             player.displayName(player.name().color(NamedTextColor.DARK_RED));

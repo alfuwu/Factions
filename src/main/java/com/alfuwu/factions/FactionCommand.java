@@ -268,7 +268,7 @@ public class FactionCommand extends Command {
                         return false;
                     }
                 case "members":
-                    String factionId3 = args.length == 1 ? faction : args[1];
+                    String factionId3 = args.length == 1 ? null : args[1];
                     FactionData factionData2 = factions.getFactionData(factionId3);
                     if (factionId3 == null) {
                         notInFaction(sender);
@@ -277,7 +277,7 @@ public class FactionCommand extends Command {
                         sender.sendMessage(Component.text("That faction doesn't exist!").color(NamedTextColor.RED));
                         return false;
                     }
-                    List<OfflinePlayer> players = factions.getAllPlayersInFaction(faction);
+                    List<OfflinePlayer> players = factions.getAllPlayersInFaction(factionId3);
                     Component text = Component.text("Members of the ")
                             .append(Component.text("[" + factionData2.name() + "]").color(factionData2.color() != null ? TextColor.color(factionData2.color()) : null).clickEvent(ClickEvent.runCommand("/faction info " + factionId3)))
                             .append(Component.text(" faction:")).appendNewline();
